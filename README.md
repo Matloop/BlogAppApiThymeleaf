@@ -106,19 +106,19 @@ Antes de começar, certifique-se de ter instalado em sua máquina:
 <p>├── src</p>
 <p>│   ├── main</p>
 <p>│   │   ├── java</p>
-<p>│   │   │   └── com/seu_pacote/  # Pacotes principais</p>
-<p>│   │   │       ├── controller   # Controladores Web (Thymeleaf)</p>
-<p>│   │   │       ├── model        # Entidades JPA (Post, Comment)</p>
-<p>│   │   │       ├── repository   # Interfaces Spring Data JPA</p>
-<p>│   │   │       └── service      # Lógica de negócio (opcional)</p>
+<p>│   │   │   └── com/**BlogAppApi**/ </p>
+<p>│   │   │       ├── controllers  </p>
+<p>│   │   │       ├── models        </p>
+<p>│   │   │       ├── repositories    </p>
+<p>│   │   │       └── services      </p>
+<p>│   │   │       └── utils      #</p>
 <p>│   │   ├── resources</p>
 <p>│   │   │   ├── static           # Arquivos estáticos</p>
 <p>│   │   │   │   ├── css          # Folhas de estilo (custom-theme.css)</p>
-<p>│   │   │   │   └── img          # Imagens (favicon.png)</p>
-<p>│   │   │   ├── templates        # Templates Thymeleaf (HTML)</p>
-<p>│   │   │   └── application.properties  # Configurações da aplicação</p>
-<p>│   └── test                     # Testes unitários/integração</p>
-<p>├── pom.xml                      # (Ou build.gradle) Dependências e build</p>
-<p>└── README.md                    # Este arquivo</p>
+<p>│   │   │   ├── templates       </p>
+<p>│   │   │   └── application.properties </p>
+<p>│   └── test                     </p>
+<p>├── pom.xml                      /p>
+
 
 
