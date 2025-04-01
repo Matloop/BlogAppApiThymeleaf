@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${post != null ? post.titulo : 'Detalhes do Post'} + ' - App Blog'">App Blog - Detalhes do Post</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    .card-subtitle i.material-icons, .comment-meta i.material-icons { font-size: 1rem; vertical-align: text-bottom; }
+    .action-buttons .btn i.material-icons,
+    .comment-actions .btn i.material-icons { font-size: 1.1rem; vertical-align: middle; }
+    .post-content, .comment-text { white-space: pre-wrap; word-wrap: break-word; }
+    .comment { border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem; }
+    .comment:last-child { border-bottom: none; }
+    .action-buttons .btn, .action-buttons>div>a, .action-buttons>div>button { margin-left: 0.5rem; } /* Spacing for post actions */
+    .comment-actions .btn, .comment-actions form { margin-left: 0.5rem; display: inline-block; }
+    .edit-comment-form .btn { margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+<header>
+  <nav class="navbar bg-body-tertiary mb-4">
+    <div class="container-fluid"> <span class="navbar-brand mb-0 h1">Web Blog</span> </div>
+  </nav>
+</header>
+<main>
+  <div class="container" style="width: 70%; padding-bottom: 30px;">
+
+    <!-- Flash Messages -->
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <span th:text="${message}"></span> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span th:text="${error}"></span> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <!-- End Flash Messages -->
+
+    <div th:if="${post != null}">
+      <!-- Post Article -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a th:href="@{/web/posts}">Posts</a></li>
+          <li class="breadcrumb-item active" aria-current="page" th:text="${#strings.abbreviate(post.titulo, 50)}">Detalhes</li>
+        </ol>
+      </nav>
+      <article>
+        <h1 class="card-title" style="font-weight: bold; margin-bottom: 20px;" th:text="${post.titulo}">Post Title</h1>
+        <p class="card-subtitle mb-2 text-muted" style="font-size: 0.9rem;">
+          <i class="material-icons">person_outline</i> <span th:text="${post.autor}">Post Author</span><br>
+          <i class="material-icons">date_range</i> <span th:text="${#temporals.format(post.data, 'dd/MM/yyyy HH:mm')}">Post Date</span>
+        </p>
+        <hr/>
+        <section><div class="card-text post-content" style="margin-top: 20px; line-height: 1.6;" th:text="${post.texto}">Post content</div></section>
+        <hr/>
+        <!-- Post Action Buttons -->
+        <div class="d-flex justify-content-between mt-4 action-buttons">
+          <a th:href="@{/web/posts}" class="btn btn-outline-secondary"><i class="material-icons">arrow_back</i> Voltar</a>
+          <div>
+            <a th:href="@{/web/posts/edit/{id}(id=${post.id})}" class="btn btn-warning me-2"><i class="material-icons">edit</i> Editar Post</a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal"><i class="material-icons">delete</i> Deletar Post</button>
+          </div>
+        </div>
+      </article>
+      <!-- End Post Article -->
+
+      <hr class="my-5"/> <!-- Separator -->
+
+      <!-- ================================================ -->
+      <!--            START COMMENTS SECTION                -->
+      <!--    (Verify everything below this line carefully) -->
+      <!-- ================================================ -->
+      <section id="comments">
+        <h3 class="mb-4">Comentários (<span th:text="${comments != null ? #lists.size(comments) : 0}">0</span>)</h3>
+
+        <!-- Add Comment Form -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Deixar um Comentário</h5>
+            <form th:action="@{/web/posts/{postId}/comments(postId=${post.id})}"
+                  th:object="${newComment}" method="post">
+              <div class="mb-3">
+                <label for="commentTexto" class="form-label">Comentário</label>
+                <textarea class="form-control" id="commentTexto" th:field="*{comentario}" rows="4"
+                          placeholder="Escreva seu comentário..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i class="material-icons" style="vertical-align: middle; font-size: 1.1rem;">comment</i> Enviar Comentário
+              </button>
+            </form>
+          </div>
+        </div>
+        <!-- End Add Comment Form -->
+
+
+        <!-- List Existing Comments -->
+        <!-- Check if comments list exists and is not empty -->
+        <div th:if="${comments != null and not #lists.isEmpty(comments)}">
+          <!-- Loop through each comment -->
+          <div class="comment" th:each="comment : ${comments}">
+
+            <!-- A: Show Edit Form if this comment is being edited -->
+            <div th:if="${commentToEdit != null and comment.id.equals(commentToEdit.id)}" class="edit-comment-form mb-3 p-3 border rounded bg-light">
+              <h6 class="mb-3">Editando Comentário</h6>
+              <form th:action="@{/web/posts/{postId}/comments/{commentId}/update(postId=${post.id}, commentId=${comment.id})}" method="post">
+                <input type="hidden" name="commentId" th:value="${comment.id}" />
+                <div class="mb-2">
+                  <label th:for="${'editComentario' + comment.id}" class="form-label small">Comentário:</label>
+                  <textarea class="form-control form-control-sm" th:id="${'editComentario' + comment.id}" name="comentario" rows="3" required th:text="${comment.comentario}"></textarea>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary"><i class="material-icons" style="font-size: 1rem; vertical-align: middle;">save</i> Salvar</button>
+                <a th:href="@{/web/posts/{id}(id=${post.id})}" class="btn btn-sm btn-secondary"><i class="material-icons" style="font-size: 1rem; vertical-align: middle;">cancel</i> Cancelar</a>
+              </form>
+            </div>
+
+            <!-- B: Show Comment Text + ACTIONS if NOT editing -->
+            <div th:unless="${commentToEdit != null and comment.id.equals(commentToEdit.id)}">
+              <div class="d-flex justify-content-between align-items-start">
+                <div><!-- Date Display -->
+                  <p class="comment-meta text-muted mb-1" style="font-size: 0.8rem;">
+                    <i class="material-icons">date_range</i>
+                    <span th:text="${#temporals.format(comment.date, 'dd/MM/yyyy')}">Date</span>
+                  </p>
+                </div>
+                <div class="comment-actions"><!-- Edit/Delete Actions -->
+                  <a th:href="@{/web/posts/{postId}/comments/{commentId}/edit(postId=${post.id}, commentId=${comment.id})}" class="btn btn-sm btn-outline-secondary" title="Editar comentário"><i class="material-icons" style="font-size: 1rem;">edit</i></a>
+                  <form th:action="@{/web/posts/{postId}/comments/{commentId}/delete(postId=${post.id}, commentId=${comment.id})}" method="post" onsubmit="return confirm('Tem certeza que deseja deletar este comentário?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Deletar comentário"><i class="material-icons" style="font-size: 1rem;">delete_outline</i></button>
+                  </form>
+                </div>
+              </div>
+              <!-- Comment Text Display -->
+              <p class="comment-text mt-2" th:text="${comment.comentario}">Comment Text</p>
+            </div><!-- End unless (displaying comment) -->
+
+          </div><!-- End comment loop item -->
+        </div><!-- End if comments exist -->
+
+        <!-- Message if no comments exist -->
+        <div th:if="${comments == null or #lists.isEmpty(comments)}" class="text-muted mt-3">
+          Nenhum comentário ainda. Seja o primeiro!
+        </div>
+        <!-- End List Existing Comments -->
+
+      </section>
+      <!-- ================================================ -->
+      <!--             END COMMENTS SECTION                 -->
+      <!-- ================================================ -->
+
+
+      <!-- Delete Post Modal (Keep as is) -->
+      <div class="modal fade" id="deletePostModal" ... > ... </div>
+
+    </div> <!-- End if post!=null -->
+
+    <div th:unless="${post != null}" class="alert alert-warning mt-4"> ... Post not found message ... </div>
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" ... ></script>
+</body>
+</html>

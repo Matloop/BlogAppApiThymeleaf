@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>App Blog - Criar Novo Post</title>
+    <!-- Import Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Import Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .field-error { color: #dc3545; font-size: 0.875em; } /* Bootstrap's text-danger color */
+    </style>
+</head>
+<body>
+<header>
+    <nav class="navbar bg-body-tertiary mb-4"> <!-- Added margin-bottom -->
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">Web Blog</span>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <div class="container" style="width: 70%; padding-bottom: 30px;"> <!-- Consistent width -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/web/posts}">Posts</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Criar Novo Post</li>
+            </ol>
+        </nav>
+
+        <!-- Display Flash Messages (e.g., if redirected back with error) -->
+        <div th:if="${message}" class="alert alert-warning alert-dismissible fade show" role="alert"> <!-- Changed to warning for validation prompt -->
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <!-- End Flash Messages -->
+
+
+        <!-- Bind form to the 'post' object provided by the controller -->
+        <form th:object="${post}" th:action="@{/web/newpost}" method="post">
+            <div class="mb-3">
+                <label for="titulo" class="form-label">Título do Post</label>
+                <!-- Use th:field for binding and name/id/value generation -->
+                <input type="text" class="form-control" id="titulo" th:field="*{titulo}"
+                       placeholder="Digite o título do seu post" th:errorclass="is-invalid">
+                <!-- Display validation errors for 'titulo' -->
+                <div th:if="${#fields.hasErrors('titulo')}" class="invalid-feedback" th:errors="*{titulo}">
+                    Título Error
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="autor" class="form-label">Autor</label>
+                <input type="text" class="form-control" id="autor" th:field="*{autor}"
+                       placeholder="Digite seu nome" th:errorclass="is-invalid">
+                <div th:if="${#fields.hasErrors('autor')}" class="invalid-feedback" th:errors="*{autor}">
+                    Autor Error
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="texto" class="form-label">Conteúdo do Post</label>
+                <textarea class="form-control" id="texto" th:field="*{texto}" rows="10"
+                          placeholder="Escreva o conteúdo completo do seu post" th:errorclass="is-invalid"></textarea>
+                <div th:if="${#fields.hasErrors('texto')}" class="invalid-feedback" th:errors="*{texto}">
+                    Texto Error
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a th:href="@{/web/posts}" class="btn btn-secondary">
+                    <i class="material-icons" style="vertical-align: middle;">cancel</i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="material-icons" style="vertical-align: middle;">save</i> Salvar Post
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<!-- Optional: Bootstrap JS and Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>
