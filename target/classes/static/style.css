@@ -1,0 +1,360 @@
+/* Custom Theme for Web Blog - Pink, Purple & Black Theme */
+:root {
+    --primary-color: #ff3399; /* Vibrant pink */
+    --secondary-color: #6a0dad; /* Deep purple */
+    --accent-color: #b19cd9; /* Lighter purple for accents */
+    --dark-bg: #121212; /* Near black for main background */
+    --card-bg: #1e1e1e; /* Slightly lighter black for cards */
+    --light-text: #ffffff; /* White text */
+    --muted-text: #b0b0b0; /* Muted gray text */
+    --success-color: #3cda84; /* Keeping a distinct success color */
+    --danger-color: #f85a5a; /* Customized danger color */
+    --warning-color: #fab83c; /* Customized warning color */
+}
+
+/* Global Styles */
+body {
+    background-color: var(--dark-bg);
+    color: var(--light-text);
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+/* Stylish Header */
+header .navbar {
+    background: linear-gradient(90deg, var(--secondary-color) 0%, var(--primary-color) 100%) !important;
+    padding: 1rem 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-brand {
+    color: var(--light-text) !important;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 1.4rem;
+}
+
+/* Container styling */
+.container {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    padding: 2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+/* Breadcrumbs styling */
+.breadcrumb {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumb-item a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: var(--muted-text);
+}
+
+/* Card Styling */
+.card {
+    background-color: rgba(38, 38, 38, 0.7);
+    border: none;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid var(--primary-color);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    color: var(--light-text);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+}
+
+.card-subtitle {
+    color: var(--accent-color) !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.card-text {
+    color: var(--muted-text);
+    line-height: 1.6;
+}
+
+/* Button Styling */
+.btn {
+    border-radius: 50px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-success {
+    background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+    border: none;
+    box-shadow: 0 4px 15px rgba(106, 13, 173, 0.4);
+}
+
+.btn-success:hover {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    box-shadow: 0 6px 18px rgba(255, 51, 153, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    box-shadow: 0 4px 15px rgba(255, 51, 153, 0.3);
+}
+
+.btn-primary:hover {
+    background-color: #ff1a8c;
+    box-shadow: 0 6px 18px rgba(255, 51, 153, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background-color: var(--secondary-color);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 15px rgba(106, 13, 173, 0.3);
+}
+
+.btn-warning:hover {
+    background-color: #5c0b9a;
+    box-shadow: 0 6px 18px rgba(106, 13, 173, 0.4);
+    transform: translateY(-2px);
+    color: white;
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border: none;
+    box-shadow: 0 4px 15px rgba(248, 90, 90, 0.3);
+}
+
+.btn-danger:hover {
+    background-color: #f63c3c;
+    box-shadow: 0 6px 18px rgba(248, 90, 90, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: #444;
+    border: none;
+    color: var(--light-text);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary:hover {
+    background-color: #555;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Outline buttons */
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-outline-warning {
+    color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.btn-outline-warning:hover {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-outline-danger {
+    color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+/* Form Styling */
+.form-control {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--light-text);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(255, 51, 153, 0.25);
+    border-color: var(--primary-color);
+    color: var(--light-text);
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.form-label {
+    color: var(--accent-color);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+/* Alert Styling */
+.alert {
+    border: none;
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.alert-success {
+    background-color: rgba(60, 218, 132, 0.15);
+    color: #2db36a;
+    border-left: 4px solid #2db36a;
+}
+
+.alert-danger {
+    background-color: rgba(248, 90, 90, 0.15);
+    color: #f63c3c;
+    border-left: 4px solid #f63c3c;
+}
+
+.alert-warning {
+    background-color: rgba(250, 184, 60, 0.15);
+    color: #f5a70b;
+    border-left: 4px solid #f5a70b;
+}
+
+/* Comments Section */
+.comment {
+    padding: 1.25rem;
+    border-radius: 10px;
+    background-color: rgba(38, 38, 38, 0.4);
+    border-left: 3px solid var(--accent-color);
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s ease;
+}
+
+.comment:hover {
+    transform: translateX(5px);
+}
+
+.comment-text {
+    color: var(--muted-text);
+}
+
+.comment-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Material Icons Enhancement */
+.material-icons {
+    vertical-align: middle;
+    margin-right: 0.25rem;
+}
+
+/* Post Content Styling */
+.post-content {
+    line-height: 1.8;
+    font-size: 1.05rem;
+    color: var(--light-text);
+}
+
+/* Modal Styling */
+.modal-content {
+    background-color: var(--card-bg);
+    color: var(--light-text);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--dark-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* Animations - Subtle page loading effect */
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+main, section {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Custom class for gradient text */
+.gradient-text {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+}
