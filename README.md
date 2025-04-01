@@ -104,20 +104,20 @@ Antes de começar, certifique-se de ter instalado em sua máquina:
 
 ## 🏗️ Estrutura do Projeto (Simplificada)
 ├── src
-│ ├── main
-│ │ ├── java
-│ │ │ └── com/seu_pacote/ # Pacotes principais
-│ │ │ ├── controller # Controladores Web (Thymeleaf)
-│ │ │ ├── model # Entidades JPA (Post, Comment)
-│ │ │ ├── repository # Interfaces Spring Data JPA
-│ │ │ └── service # Lógica de negócio (opcional)
-│ │ ├── resources
-│ │ │ ├── static # Arquivos estáticos
-│ │ │ │ ├── css # Folhas de estilo (custom-theme.css)
-│ │ │ │ └── img # Imagens (favicon.png)
-│ │ │ ├── templates # Templates Thymeleaf (HTML)
-│ │ │ └── application.properties # Configurações da aplicação
-│ └── test # Testes unitários/integração
-├── pom.xml # (Ou build.gradle) Dependências e build
-└── README.md # Este arquivo
+│   ├── main
+│   │   ├── java
+│   │   │   └── com/seu_pacote/  # Pacotes principais
+│   │   │       ├── controller   # Controladores Web (Thymeleaf)
+│   │   │       ├── model        # Entidades JPA (Post, Comment)
+│   │   │       ├── repository   # Interfaces Spring Data JPA
+│   │   │       └── service      # Lógica de negócio (opcional)
+│   │   ├── resources
+│   │   │   ├── static           # Arquivos estáticos
+│   │   │   │   ├── css          # Folhas de estilo (custom-theme.css)
+│   │   │   │   └── img          # Imagens (favicon.png)
+│   │   │   ├── templates        # Templates Thymeleaf (HTML)
+│   │   │   └── application.properties  # Configurações da aplicação
+│   └── test                     # Testes unitários/integração
+├── pom.xml                      # (Ou build.gradle) Dependências e build
+└── README.md                    # Este arquivo
 
