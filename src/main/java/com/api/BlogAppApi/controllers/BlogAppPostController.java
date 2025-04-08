@@ -2,26 +2,22 @@ package com.api.BlogAppApi.controllers;
 
 import com.api.BlogAppApi.dtos.BlogAppRecordDto;
 import com.api.BlogAppApi.dtos.BlogAppRecordDtoComentario;
-import com.api.BlogAppApi.models.BlogAppPostModel;
-import com.api.BlogAppApi.models.PostComentarioModel;
+import com.api.BlogAppApi.models.BlogAppPost;
+import com.api.BlogAppApi.models.PostComentario;
 import com.api.BlogAppApi.services.BlogAppPostService;
 import com.api.BlogAppApi.services.BlogAppPostServiceComentarios;
 import jakarta.validation.Valid;
-import jakarta.websocket.OnClose;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,44 +36,44 @@ public class BlogAppPostController {
 
     // Endpoint para adicionar um novo post
     @PostMapping
-    public ResponseEntity<BlogAppPostModel> addBlogAppPost(@RequestBody BlogAppPostModel blogAppPostModel) {
-        BlogAppPostModel savedPost = blogAppPostService.addBlogAppPost(blogAppPostModel);
+    public ResponseEntity<BlogAppPost> addBlogAppPost(@RequestBody BlogAppPost blogAppPost) {
+        BlogAppPost savedPost = blogAppPostService.addBlogAppPost(blogAppPost);
         return new ResponseEntity<>(savedPost, HttpStatus.CREATED);
     }
 
     @PostMapping("/newpost")
     public ResponseEntity<Object> savePost(@RequestBody @Valid BlogAppRecordDto blogAppRecordDto) {
         // Converte o DTO para o modelo de entidade
-        BlogAppPostModel postModel = new BlogAppPostModel();
+        BlogAppPost postModel = new BlogAppPost();
         BeanUtils.copyProperties(blogAppRecordDto, postModel);
 
         // Define a data atual (início do dia em UTC)
         postModel.setData(LocalDateTime.now());
 
         // Persiste o post e retorna o objeto salvo com status 201 (Created)
-        BlogAppPostModel savedPost = blogAppPostService.addBlogAppPost(postModel);
+        BlogAppPost savedPost = blogAppPostService.addBlogAppPost(postModel);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPost);
     }
 
     // Endpoint para listar todos os posts
     @GetMapping
-    public ResponseEntity<List<BlogAppPostModel>> getAllBlogAppPosts() {
-        List<BlogAppPostModel> posts = blogAppPostService.getAllBlogAppPosts();
+    public ResponseEntity<List<BlogAppPost>> getAllBlogAppPosts() {
+        List<BlogAppPost> posts = blogAppPostService.getAllBlogAppPosts();
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
     // Endpoint para buscar um post por ID
     @GetMapping("/{id}")
-    public ResponseEntity<BlogAppPostModel> getBlogAppPostById(@PathVariable UUID id) {
-        Optional<BlogAppPostModel> post = blogAppPostService.getBlogAppPostById(id);
+    public ResponseEntity<BlogAppPost> getBlogAppPostById(@PathVariable UUID id) {
+        Optional<BlogAppPost> post = blogAppPostService.getBlogAppPostById(id);
         return post.map(blogAppPostModel -> new ResponseEntity<>(blogAppPostModel, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     // Endpoint para atualizar um post existente
     @PutMapping("/{id}")
-    public ResponseEntity<BlogAppPostModel> updateBlogAppPost(@PathVariable UUID id, @RequestBody BlogAppPostModel blogAppPostModel) {
-        BlogAppPostModel updatedPost = blogAppPostService.updateBlogAppPost(blogAppPostModel);
+    public ResponseEntity<BlogAppPost> updateBlogAppPost(@PathVariable UUID id, @RequestBody BlogAppPost blogAppPost) {
+        BlogAppPost updatedPost = blogAppPostService.updateBlogAppPost(blogAppPost);
         return updatedPost != null ? new ResponseEntity<>(updatedPost, HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -91,7 +87,7 @@ public class BlogAppPostController {
 
     @DeleteMapping("/posts/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable UUID id) {
-        Optional<BlogAppPostModel> blogAppModelOptional = blogAppPostService.getBlogAppPostById(id);
+        Optional<BlogAppPost> blogAppModelOptional = blogAppPostService.getBlogAppPostById(id);
 
         if (blogAppModelOptional.isEmpty()) {
             // Se o post não for encontrado, retorna 404 NOT FOUND
@@ -104,30 +100,30 @@ public class BlogAppPostController {
     }
 
     @PutMapping("editpost/{id}")
-    public ResponseEntity<BlogAppPostModel> editPost(@PathVariable UUID id, @RequestBody BlogAppPostModel blogAppPostModel) {
-        Optional<BlogAppPostModel> blogAppModelOptional = blogAppPostService.getBlogAppPostById(id);
+    public ResponseEntity<BlogAppPost> editPost(@PathVariable UUID id, @RequestBody BlogAppPost blogAppPost) {
+        Optional<BlogAppPost> blogAppModelOptional = blogAppPostService.getBlogAppPostById(id);
 
         if (blogAppModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         // Garante que o ID do corpo seja o mesmo da URL
-        blogAppPostModel.setId(id);
+        blogAppPost.setId(id);
 
-        BlogAppPostModel updatedPost = blogAppPostService.updateBlogAppPost(blogAppPostModel);
+        BlogAppPost updatedPost = blogAppPostService.updateBlogAppPost(blogAppPost);
         return ResponseEntity.ok(updatedPost);
     }
 
     @PostMapping("/posts/{id}")
     public ResponseEntity<Object> saveComentarioPost(@PathVariable("id") UUID id,
                                                      @RequestBody @Valid BlogAppRecordDtoComentario blogAppRecordDtoComentario) {
-        Optional<BlogAppPostModel> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(id);
+        Optional<BlogAppPost> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(id);
         if (blogAppPostModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post não encontrado");
         }
 
-        PostComentarioModel postComentario = new PostComentarioModel();
-        BlogAppPostModel postModel = blogAppPostModelOptional.get();
+        PostComentario postComentario = new PostComentario();
+        BlogAppPost postModel = blogAppPostModelOptional.get();
         BeanUtils.copyProperties(blogAppRecordDtoComentario, postComentario);
         postComentario.setPostModel(postModel);
         postComentario.setDate(LocalDateTime.now(ZoneId.of("UTC")));
@@ -141,7 +137,7 @@ public class BlogAppPostController {
     // Listar posts com seus comentários
     @GetMapping("/posts-with-comments")
     public ResponseEntity<List<Map<String, Object>>> getPostsWithComments() {
-        List<BlogAppPostModel> posts = blogAppPostService.getAllBlogAppPosts();
+        List<BlogAppPost> posts = blogAppPostService.getAllBlogAppPosts();
         List<Map<String, Object>> postsWithComments = posts.stream()
                 .map(post -> {
                     Map<String, Object> postMap = new HashMap<>();
@@ -156,34 +152,34 @@ public class BlogAppPostController {
 
     // Listar comentários de um post específico
     @GetMapping("/posts/{postId}/comentarios")
-    public ResponseEntity<List<PostComentarioModel>> getComentariosByPostId(@PathVariable UUID postId) {
-        Optional<BlogAppPostModel> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(postId);
+    public ResponseEntity<List<PostComentario>> getComentariosByPostId(@PathVariable UUID postId) {
+        Optional<BlogAppPost> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(postId);
 
         if (blogAppPostModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        List<PostComentarioModel> comentarios = blogAppPostServiceComentarios.getComentariosByPostId(postId);
+        List<PostComentario> comentarios = blogAppPostServiceComentarios.getComentariosByPostId(postId);
         return ResponseEntity.ok(comentarios);
     }
 
     // Obter um comentário específico de um post
     @GetMapping("/posts/{postId}/comentarios/{comentarioId}")
-    public ResponseEntity<PostComentarioModel> getComentarioById(
+    public ResponseEntity<PostComentario> getComentarioById(
             @PathVariable UUID postId,
             @PathVariable UUID comentarioId) {
 
-        Optional<BlogAppPostModel> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(postId);
+        Optional<BlogAppPost> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(postId);
         if (blogAppPostModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Optional<PostComentarioModel> comentarioOptional = blogAppPostServiceComentarios.getPostComentarioById(comentarioId);
+        Optional<PostComentario> comentarioOptional = blogAppPostServiceComentarios.getPostComentarioById(comentarioId);
         if (comentarioOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        PostComentarioModel comentario = comentarioOptional.get();
+        PostComentario comentario = comentarioOptional.get();
 
         // Verifica se o comentário pertence ao post especificado
         if (!comentario.getPostModel().getId().equals(postId)) {
@@ -195,22 +191,22 @@ public class BlogAppPostController {
 
     // Editar um comentário de um post
     @PutMapping("/posts/{postId}/comentarios/{comentarioId}")
-    public ResponseEntity<PostComentarioModel> updateComentario(
+    public ResponseEntity<PostComentario> updateComentario(
             @PathVariable UUID postId,
             @PathVariable UUID comentarioId,
             @RequestBody @Valid BlogAppRecordDtoComentario blogAppRecordDtoComentario) {
 
-        Optional<BlogAppPostModel> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(postId);
+        Optional<BlogAppPost> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(postId);
         if (blogAppPostModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Optional<PostComentarioModel> comentarioOptional = blogAppPostServiceComentarios.getPostComentarioById(comentarioId);
+        Optional<PostComentario> comentarioOptional = blogAppPostServiceComentarios.getPostComentarioById(comentarioId);
         if (comentarioOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        PostComentarioModel comentario = comentarioOptional.get();
+        PostComentario comentario = comentarioOptional.get();
 
         // Verifica se o comentário pertence ao post especificado
         if (!comentario.getPostModel().getId().equals(postId)) {
@@ -220,7 +216,7 @@ public class BlogAppPostController {
         // Atualiza apenas o conteúdo do comentário
         comentario.setComentario(blogAppRecordDtoComentario.comentario());
 
-        PostComentarioModel updatedComentario = blogAppPostServiceComentarios.updatePostComentario(comentario);
+        PostComentario updatedComentario = blogAppPostServiceComentarios.updatePostComentario(comentario);
         return ResponseEntity.ok(updatedComentario);
     }
 
@@ -230,17 +226,17 @@ public class BlogAppPostController {
             @PathVariable UUID postId,
             @PathVariable UUID comentarioId) {
 
-        Optional<BlogAppPostModel> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(postId);
+        Optional<BlogAppPost> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(postId);
         if (blogAppPostModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Optional<PostComentarioModel> comentarioOptional = blogAppPostServiceComentarios.getPostComentarioById(comentarioId);
+        Optional<PostComentario> comentarioOptional = blogAppPostServiceComentarios.getPostComentarioById(comentarioId);
         if (comentarioOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        PostComentarioModel comentario = comentarioOptional.get();
+        PostComentario comentario = comentarioOptional.get();
 
         // Verifica se o comentário pertence ao post especificado
         if (!comentario.getPostModel().getId().equals(postId)) {
@@ -253,34 +249,34 @@ public class BlogAppPostController {
 
     // Corrigindo o método existente que tinha erros
     @GetMapping("/listpost/{id}")
-    public ResponseEntity<List<PostComentarioModel>> getPostComentarios(@PathVariable("id") UUID id) {
-        Optional<BlogAppPostModel> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(id);
+    public ResponseEntity<List<PostComentario>> getPostComentarios(@PathVariable("id") UUID id) {
+        Optional<BlogAppPost> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(id);
 
         if (blogAppPostModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        List<PostComentarioModel> comentarios = blogAppPostServiceComentarios.getComentariosByPostId(id);
+        List<PostComentario> comentarios = blogAppPostServiceComentarios.getComentariosByPostId(id);
         return ResponseEntity.ok(comentarios);
     }
 
     // Corrigindo o método existente que tinha erros
     @GetMapping("/post/{postId}/comentario/{comentarioId}")
-    public ResponseEntity<PostComentarioModel> getPostComentariosById(
+    public ResponseEntity<PostComentario> getPostComentariosById(
             @PathVariable("postId") UUID postId,
             @PathVariable("comentarioId") UUID comentarioId) {
 
-        Optional<BlogAppPostModel> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(postId);
+        Optional<BlogAppPost> blogAppPostModelOptional = blogAppPostService.getBlogAppPostById(postId);
         if (blogAppPostModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Optional<PostComentarioModel> comentarioOptional = blogAppPostServiceComentarios.getPostComentarioById(comentarioId);
+        Optional<PostComentario> comentarioOptional = blogAppPostServiceComentarios.getPostComentarioById(comentarioId);
         if (comentarioOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        PostComentarioModel comentario = comentarioOptional.get();
+        PostComentario comentario = comentarioOptional.get();
 
         // Verifica se o comentário pertence ao post especificado
         if (!comentario.getPostModel().getId().equals(postId)) {

@@ -1,9 +1,10 @@
 package com.api.BlogAppApi.controllers;
 
-import com.api.BlogAppApi.models.BlogAppPostModel;
-import com.api.BlogAppApi.models.PostComentarioModel; // Import Comment Model
+import com.api.BlogAppApi.dtos.BlogAppRecordDto; // Importar o DTO
+import com.api.BlogAppApi.models.BlogAppPost;
+import com.api.BlogAppApi.models.PostComentario;
 import com.api.BlogAppApi.services.BlogAppPostService;
-import com.api.BlogAppApi.services.BlogAppPostServiceComentarios; // Import Comment Service Interface
+import com.api.BlogAppApi.services.BlogAppPostServiceComentarios;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +17,11 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
-import java.util.Collections; // Import Collections
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/web")
@@ -28,168 +30,170 @@ public class BlogAppControllerWeb {
     private static final Logger log = LoggerFactory.getLogger(BlogAppControllerWeb.class);
 
     private final BlogAppPostService blogAppPostService;
-    private final BlogAppPostServiceComentarios blogAppPostServiceComentarios; // Inject Comment Service
+    private final BlogAppPostServiceComentarios blogAppPostServiceComentarios;
 
     @Autowired
-    // Update constructor to inject the comment service
+    // Injeção das classes services
     public BlogAppControllerWeb(BlogAppPostService blogAppPostService,
                                 BlogAppPostServiceComentarios blogAppPostServiceComentarios) {
         this.blogAppPostService = blogAppPostService;
-        this.blogAppPostServiceComentarios = blogAppPostServiceComentarios; // Assign injected service
+        this.blogAppPostServiceComentarios = blogAppPostServiceComentarios;
     }
 
-
-    // Other methods (getPosts, getPostForm, savePost, getEditPostForm, updatePost, deletePost) remain largely the same
-    // Ensure they still exist and function correctly. Adding logs to them is helpful.
-    // ... [ Rest of the methods from previous examples, potentially with logging added ] ...
-
+    //Retornar todos os posts
     @GetMapping("/posts")
     public ModelAndView getPosts() {
-        log.info("Fetching all posts for /web/posts");
+        //Criar e retornar modelo de model and view
         ModelAndView modelAndView = new ModelAndView("posts");
-        List<BlogAppPostModel> posts = blogAppPostService.getAllBlogAppPosts();
-        modelAndView.addObject("posts", posts);
-        log.info("Found {} posts.", posts.size());
+        try {
+            List<BlogAppPost> posts = blogAppPostService.getAllBlogAppPosts()
+                    .stream()
+                    .sorted(Comparator.comparing(BlogAppPost::getData).reversed())
+                    .collect(Collectors.toList());
+            modelAndView.addObject("posts", posts);
+        } catch (Exception e) {
+            log.error("Erro ao buscar posts para /web/posts", e);
+            modelAndView.addObject("globalError", "Não foi possível carregar os posts.");
+        }
         return modelAndView;
     }
 
+    //Mostrar o formulário para o usuário preencher
     @GetMapping(value = "/newpost")
     public String getPostForm(Model model) {
-        log.info("Showing new post form");
-        model.addAttribute("post", new BlogAppPostModel());
+        model.addAttribute("post", new BlogAppRecordDto("", "", ""));
         return "newPostForm";
     }
-
+    //Envio de dados do form para database
     @PostMapping(value = "/newpost")
-    public String savePost(@Valid @ModelAttribute("post") BlogAppPostModel post,
+    public String savePost(@Valid @ModelAttribute("post") BlogAppRecordDto postDto,
                            BindingResult bindingResult,
-                           RedirectAttributes attributes, Model model) { // Added Model
-        log.info("Attempting to SAVE new post. Title: '{}'", post.getTitulo());
-        if (bindingResult.hasErrors()) {
-            log.warn("Validation errors found while saving new post. Returning to form.");
-            // Need model to hold the invalid post data when returning to form
-            model.addAttribute("post", post);
-            return "newPostForm"; // Return to the form view
-        }
-        post.setData(LocalDateTime.now());
-        try {
-            blogAppPostService.addBlogAppPost(post);
-            log.info("New post saved successfully. ID: {}", post.getId());
-            attributes.addFlashAttribute("message", "Post criado com sucesso!");
-        } catch (Exception e) {
-            log.error("Error saving new post: {}", e.getMessage(), e);
-            attributes.addFlashAttribute("error", "Erro ao salvar o post.");
-        }
-        return "redirect:/web/posts";
-    }
+                           RedirectAttributes attributes,
+                           Model model) {
 
+        if (bindingResult.hasErrors()) {
+            // Se der errado os dados do usuário continuam preechidos
+            model.addAttribute("post", postDto);
+            return "newPostForm";
+        }
+
+        BlogAppPost newPost = new BlogAppPost();
+        newPost.setAutor(postDto.autor());
+        newPost.setTitulo(postDto.titulo());
+        newPost.setTexto(postDto.texto());
+        //Colocar data atual na ho post
+        newPost.setData(LocalDateTime.now());
+
+        //Exibir mensagens de erro ou sucesso na hora da criação do post
+        try {
+            blogAppPostService.addBlogAppPost(newPost);
+            attributes.addFlashAttribute("message", "Post criado com sucesso!");
+            return "redirect:/web/posts";
+        } catch (Exception e) {
+            log.error("Erro ao salvar novo post", e);
+            attributes.addFlashAttribute("error", "Erro ao salvar o post.");
+            return "redirect:/web/newpost";
+        }
+    }
+    //Mostrar formulário de edição
     @GetMapping("/posts/edit/{id}")
     public String getEditPostForm(@PathVariable UUID id, Model model, RedirectAttributes attributes) {
-        log.info("Attempting to show EDIT form for post ID: {}", id);
-        Optional<BlogAppPostModel> postOptional = blogAppPostService.getBlogAppPostById(id);
-
+        //Buscar post na database
+        Optional<BlogAppPost> postOptional = blogAppPostService.getBlogAppPostById(id);
+        //Se existir mandar os dados, se não pop up na tela
         if (postOptional.isPresent()) {
-            log.info("Post found for edit. Title: '{}'", postOptional.get().getTitulo());
-            model.addAttribute("post", postOptional.get());
+            BlogAppPost postEntity = postOptional.get();
+            BlogAppRecordDto postDto = new BlogAppRecordDto(
+                    postEntity.getAutor(),
+                    postEntity.getTitulo(),
+                    postEntity.getTexto()
+            );
+            model.addAttribute("post", postDto);
+            model.addAttribute("postId", postEntity.getId());
+            model.addAttribute("postDate", postEntity.getData());
             return "editPostForm";
         } else {
-            log.warn("Post not found for edit. ID: {}", id);
             attributes.addFlashAttribute("error", "Post não encontrado para edição (ID: " + id + ").");
             return "redirect:/web/posts";
         }
     }
-
+    //Editar post no banco de dados
     @PostMapping("/posts/update/{id}")
     public String updatePost(@PathVariable UUID id,
-                             @Valid @ModelAttribute("post") BlogAppPostModel postFormData,
+                             @Valid @ModelAttribute("post") BlogAppRecordDto postDto,
                              BindingResult bindingResult,
                              RedirectAttributes attributes,
                              Model model) {
-        log.info("Attempting to UPDATE post with ID: {}", id);
-        // Set ID here before validation check in case we return to form
-        postFormData.setId(id);
-
+        //Se estiver errado mostrar mensagem de erro e manter os dados
         if (bindingResult.hasErrors()) {
-            log.warn("Validation errors found while updating post ID: {}. Returning to edit form.", id);
-            // Fetch original date if possible to display correctly on form
-            blogAppPostService.getBlogAppPostById(id).ifPresent(orig -> postFormData.setData(orig.getData()));
-            model.addAttribute("post", postFormData); // Keep user data with errors
+            model.addAttribute("post", postDto);
+            model.addAttribute("postId", id);
+            blogAppPostService.getBlogAppPostById(id)
+                    .ifPresent(orig -> model.addAttribute("postDate", orig.getData()));
             return "editPostForm";
         }
-
-        Optional<BlogAppPostModel> originalPostOptional = blogAppPostService.getBlogAppPostById(id);
+        //Pegar o post por ID e se não existir mostrar pop up
+        Optional<BlogAppPost> originalPostOptional = blogAppPostService.getBlogAppPostById(id);
 
         if (originalPostOptional.isEmpty()) {
-            log.warn("Post not found for update. ID: {}", id);
             attributes.addFlashAttribute("error", "Post não encontrado para atualização (ID: " + id + ").");
             return "redirect:/web/posts";
         }
-
-        BlogAppPostModel originalPost = originalPostOptional.get();
-        log.info("Original post found for update. Title: '{}'", originalPost.getTitulo());
-
-        originalPost.setTitulo(postFormData.getTitulo());
-        originalPost.setAutor(postFormData.getAutor());
-        originalPost.setTexto(postFormData.getTexto());
-
+        //Tentar editar o post com os informações coletados, se der certo sucesso, se der errado erro
+        BlogAppPost originalPost = originalPostOptional.get();
         try {
+            originalPost.setTitulo(postDto.titulo());
+            originalPost.setAutor(postDto.autor());
+            originalPost.setTexto(postDto.texto());
+
             blogAppPostService.updateBlogAppPost(originalPost);
-            log.info("Post updated successfully. ID: {}", id);
             attributes.addFlashAttribute("message", "Post atualizado com sucesso!");
-            return "redirect:/web/posts/" + id; // Redirect back to post details
+            return "redirect:/web/posts";
+
         } catch (Exception e) {
-            log.error("Error updating post with ID: {}: {}", id, e.getMessage(), e);
+            log.error("Error updating post {}", id, e);
             attributes.addFlashAttribute("error", "Erro ao atualizar o post.");
-            postFormData.setData(originalPost.getData()); // Keep original date for display
-            model.addAttribute("post", postFormData);
+            model.addAttribute("post", postDto);
+            model.addAttribute("postId", id);
+            model.addAttribute("postDate", originalPost.getData());
             return "editPostForm";
         }
     }
 
+    //Deleção de posts
     @PostMapping("/posts/delete/{id}")
     public String deletePost(@PathVariable UUID id, RedirectAttributes attributes) {
-        log.info("Attempting to DELETE post with ID: {}", id);
-
-        // *** IMPORTANT: Delete Comments First (or configure CascadeType.REMOVE) ***
-        // If comments are not automatically deleted via Cascade, do it manually:
+        //Deletar comentários do posts
         try {
-            List<PostComentarioModel> commentsToDelete = blogAppPostServiceComentarios.getComentariosByPostId(id);
+            List<PostComentario> commentsToDelete = blogAppPostServiceComentarios.getComentariosByPostId(id);
             if (!commentsToDelete.isEmpty()) {
-                log.info("Deleting {} comments associated with post ID: {}", commentsToDelete.size(), id);
-                for (PostComentarioModel comment : commentsToDelete) {
+                log.info("Deleting {} comments for post {}", commentsToDelete.size(), id);
+                for (PostComentario comment : commentsToDelete) {
                     blogAppPostServiceComentarios.deletePostComentario(comment.getId());
                 }
             }
         } catch (Exception e) {
-            log.error("Error deleting associated comments for post ID: {}: {}", id, e.getMessage(), e);
-            attributes.addFlashAttribute("error", "Erro ao deletar comentários associados ao post.");
-            // Decide if you want to proceed with post deletion or stop here
-            return "redirect:/web/posts/" + id; // Redirect back to details page on comment deletion error
+            log.error("Erro ao deletar comentários para o post {}", id, e);
+            attributes.addFlashAttribute("error", "Erro ao deletar comentários associados ao post. O post não foi deletado.");
+            return "redirect:/web/posts";
         }
-        // *** End Comment Deletion ***
-
-
-        Optional<BlogAppPostModel> postOptional = blogAppPostService.getBlogAppPostById(id);
+        //Pegar post da database por ID
+        Optional<BlogAppPost> postOptional = blogAppPostService.getBlogAppPostById(id);
 
         if (postOptional.isEmpty()) {
-            log.warn("Post not found for deletion. ID: {}", id);
-            attributes.addFlashAttribute("error", "Post não encontrado para exclusão (ID: " + id + ").");
-            // Should redirect to posts list as the post doesn't exist anyway
+            log.warn("Tentativa de deletar post {} que não foi encontrado.", id);
             return "redirect:/web/posts";
         }
-
+        //Tentar deletar
         try {
-            log.info("Deleting post. Title: '{}'", postOptional.get().getTitulo());
             blogAppPostService.deleteBlogAppPost(id);
-            log.info("Post deleted successfully. ID: {}", id);
             attributes.addFlashAttribute("message", "Post e seus comentários deletados com sucesso!");
+            log.info("Post {} deletado com sucesso", id);
         } catch (Exception e) {
-            log.error("Error deleting post with ID: {}: {}", id, e.getMessage(), e);
+            log.error("Erro ao deletar o post {}", id, e);
             attributes.addFlashAttribute("error", "Erro ao deletar o post.");
-            // Redirect back to posts list as the details page won't exist
             return "redirect:/web/posts";
         }
-        // Redirect to the main posts list after successful deletion
         return "redirect:/web/posts";
     }
 }

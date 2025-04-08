@@ -1,7 +1,6 @@
 package com.api.BlogAppApi.services;
 
-import com.api.BlogAppApi.models.BlogAppPostModel;
-import com.api.BlogAppApi.models.PostComentarioModel;
+import com.api.BlogAppApi.models.PostComentario;
 import com.api.BlogAppApi.repositories.PostComentarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,27 +16,27 @@ public class BlogAppServiceImplPostComentario implements BlogAppPostServiceComen
     private PostComentarioRepository postComentarioRepository;
 
     @Override
-    public PostComentarioModel savePostComentario(PostComentarioModel postComentario) {
+    public PostComentario savePostComentario(PostComentario postComentario) {
         return postComentarioRepository.save(postComentario);
     }
 
     @Override
-    public List<PostComentarioModel> getAllPostComentarios() {
+    public List<PostComentario> getAllPostComentarios() {
         return postComentarioRepository.findAll();
     }
 
     @Override
-    public List<PostComentarioModel> getComentariosByPostId(UUID postId) {
+    public List<PostComentario> getComentariosByPostId(UUID postId) {
         return postComentarioRepository.findByPostModelId(postId);
     }
 
     @Override
-    public Optional<PostComentarioModel> getPostComentarioById(UUID id) {
+    public Optional<PostComentario> getPostComentarioById(UUID id) {
         return postComentarioRepository.findById(id);
     }
 
     @Override
-    public PostComentarioModel updatePostComentario(PostComentarioModel postComentario) {
+    public PostComentario updatePostComentario(PostComentario postComentario) {
         return postComentarioRepository.save(postComentario);
     }
 

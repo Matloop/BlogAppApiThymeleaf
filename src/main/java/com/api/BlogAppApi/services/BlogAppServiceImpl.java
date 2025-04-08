@@ -1,6 +1,6 @@
 package com.api.BlogAppApi.services;
 
-import com.api.BlogAppApi.models.BlogAppPostModel;
+import com.api.BlogAppApi.models.BlogAppPost;
 import com.api.BlogAppApi.repositories.BlogAppPostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,23 +20,23 @@ public class BlogAppServiceImpl implements BlogAppPostService {
     }
 
     @Override
-    public BlogAppPostModel addBlogAppPost(BlogAppPostModel blogAppPostModel) {
-        return postRepository.save(blogAppPostModel);
+    public BlogAppPost addBlogAppPost(BlogAppPost blogAppPost) {
+        return postRepository.save(blogAppPost);
     }
 
     @Override
-    public List<BlogAppPostModel> getAllBlogAppPosts() {
+    public List<BlogAppPost> getAllBlogAppPosts() {
         return postRepository.findAll();
     }
 
     @Override
-    public Optional<BlogAppPostModel> getBlogAppPostById(UUID id) {
+    public Optional<BlogAppPost> getBlogAppPostById(UUID id) {
         return postRepository.findById(id);
     }
 
     @Override
-    public BlogAppPostModel updateBlogAppPost(BlogAppPostModel blogAppPostModel) {
-        return postRepository.save(blogAppPostModel);
+    public BlogAppPost updateBlogAppPost(BlogAppPost blogAppPost) {
+        return postRepository.save(blogAppPost);
     }
 
     @Override
