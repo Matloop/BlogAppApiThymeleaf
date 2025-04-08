@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 @Entity
+@Table(name = "blog_app_post")
 public class BlogAppPost implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
